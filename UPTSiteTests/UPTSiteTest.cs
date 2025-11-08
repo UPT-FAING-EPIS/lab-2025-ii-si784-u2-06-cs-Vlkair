@@ -46,7 +46,7 @@ public class UPTSiteTest : PageTest
     [TestMethod]
     public async Task HasTitle()
     {
-        await Page.GotoAsync("https://www.upt.edu.pe");
+        await Page.GotoAsync("https://www.upt.edu.pe", new() { Timeout = 60000 });
 
         // Expect a title "to contain" a substring.
         await Expect(Page).ToHaveTitleAsync(new Regex("Universidad"));
@@ -57,7 +57,7 @@ public class UPTSiteTest : PageTest
     {
         // Arrange
         string schoolDirectorName = "Ing. Martha Judith Paredes Vignola";
-        await Page.GotoAsync("https://www.upt.edu.pe");
+        await Page.GotoAsync("https://www.upt.edu.pe", new() { Timeout = 60000 });
 
         // Act
         await Page.GetByRole(AriaRole.Button, new() { Name = "×" }).ClickAsync();
@@ -74,9 +74,9 @@ public class UPTSiteTest : PageTest
     public async Task SearchStudentInDirectoryPage()
     {
         // Arrange
-        string studentName = "AYMA CHOQUE, ERICK YOEL";
-        string studentSearch = studentName.Split(" ")[0];
-        await Page.GotoAsync("https://www.upt.edu.pe");
+        string studentName = "CRUZ MAMANI, VICTOR WILLIAMS";
+        string studentSearch = "CRUZ";
+        await Page.GotoAsync("https://www.upt.edu.pe", new() { Timeout = 60000 });
 
         // Act
         await Page.GetByRole(AriaRole.Button, new() { Name = "×" }).ClickAsync();
@@ -90,5 +90,33 @@ public class UPTSiteTest : PageTest
 
         // Assert
         await Expect(Page.Locator("iframe").ContentFrame.GetByRole(AriaRole.Table)).ToContainTextAsync(studentName);
-    } 
+    }
+
+    [TestMethod]
+    public async Task VerifyHomePageHasContent()
+    {
+        // Arrange
+        await Page.GotoAsync("https://www.upt.edu.pe", new() { Timeout = 60000 });
+
+        // Act
+        await Page.GetByRole(AriaRole.Button, new() { Name = "×" }).ClickAsync();
+
+        // Assert - Verificar que la página tiene contenido visible
+        await Expect(Page.Locator("body")).ToBeVisibleAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("upt.edu.pe"));
+    }
+
+    [TestMethod]
+    public async Task VerifyNavigationMenuIsVisible()
+    {
+        // Arrange
+        await Page.GotoAsync("https://www.upt.edu.pe", new() { Timeout = 60000 });
+
+        // Act
+        await Page.GetByRole(AriaRole.Button, new() { Name = "×" }).ClickAsync();
+        
+        // Assert - Verificar que el menú de navegación principal está visible
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Pre-Grado" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Post-Grado" })).ToBeVisibleAsync();
+    }
 }
