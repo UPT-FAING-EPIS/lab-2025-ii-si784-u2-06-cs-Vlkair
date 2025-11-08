@@ -83,7 +83,7 @@ jobs:
           echo "✅ Videos copied: $(ls UPTSiteTests/bin/Debug/net8.0/videos | wc -l) files"
           
           # Create index.html for videos
-          cat > public/videos/index.html << 'VIDEOEOF'
+          cat > public/videos/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="es">
           <head>
@@ -103,28 +103,26 @@ jobs:
               <h1>🎬 Videos de Pruebas Automatizadas</h1>
               <p>Grabaciones de la ejecución de cada test:</p>
               <div class="video-grid">
-          VIDEOEOF
+          EOF
           
           for video in public/videos/*.webm; do
             if [ -f "$video" ]; then
               filename=$(basename "$video")
-              cat >> public/videos/index.html << VIDEOEOF
-              <div class="video-card">
-                  <video controls>
-                      <source src="$filename" type="video/webm">
-                      Tu navegador no soporta el tag de video.
-                  </video>
-                  <div class="video-name">$filename</div>
-              </div>
-          VIDEOEOF
+              echo "<div class=\"video-card\">" >> public/videos/index.html
+              echo "  <video controls>" >> public/videos/index.html
+              echo "    <source src=\"$filename\" type=\"video/webm\">" >> public/videos/index.html
+              echo "    Tu navegador no soporta el tag de video." >> public/videos/index.html
+              echo "  </video>" >> public/videos/index.html
+              echo "  <div class=\"video-name\">$filename</div>" >> public/videos/index.html
+              echo "</div>" >> public/videos/index.html
             fi
           done
           
-          cat >> public/videos/index.html << 'VIDEOEOF'
+          cat >> public/videos/index.html << 'EOF'
               </div>
           </body>
           </html>
-          VIDEOEOF
+          EOF
         else
           echo "⚠️ No videos found"
           echo "<html><body><h1>No videos available</h1><p>Videos are generated during test execution.</p></body></html>" > public/videos/index.html
@@ -137,7 +135,7 @@ jobs:
           echo "✅ Traces copied: $(ls UPTSiteTests/bin/Debug/net8.0/playwright-traces | wc -l) files"
           
           # Create index.html for traces
-          cat > public/traces/index.html << 'TRACEEOF'
+          cat > public/traces/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="es">
           <head>
@@ -170,30 +168,28 @@ jobs:
               </div>
               <div class="trace-list">
                   <h2>Archivos de Trace Disponibles:</h2>
-          TRACEEOF
+          EOF
           
           for trace in public/traces/*.zip; do
             if [ -f "$trace" ]; then
               filename=$(basename "$trace")
               filesize=$(du -h "$trace" | cut -f1)
               testname=$(echo "$filename" | sed 's/UPTSiteTests.UPTSiteTest.//g' | sed 's/.zip//g')
-              cat >> public/traces/index.html << TRACEEOF
-              <div class="trace-item">
-                  <div>
-                      <div class="trace-name">📋 $testname</div>
-                      <div class="trace-size">Tamaño: $filesize</div>
-                  </div>
-                  <a href="$filename" class="download-btn" download>⬇️ Descargar</a>
-              </div>
-          TRACEEOF
+              echo "<div class=\"trace-item\">" >> public/traces/index.html
+              echo "  <div>" >> public/traces/index.html
+              echo "    <div class=\"trace-name\">📋 $testname</div>" >> public/traces/index.html
+              echo "    <div class=\"trace-size\">Tamaño: $filesize</div>" >> public/traces/index.html
+              echo "  </div>" >> public/traces/index.html
+              echo "  <a href=\"$filename\" class=\"download-btn\" download>⬇️ Descargar</a>" >> public/traces/index.html
+              echo "</div>" >> public/traces/index.html
             fi
           done
           
-          cat >> public/traces/index.html << 'TRACEEOF'
+          cat >> public/traces/index.html << 'EOF'
               </div>
           </body>
           </html>
-          TRACEEOF
+          EOF
         else
           echo "⚠️ No traces found"
           echo "<html><body><h1>No traces available</h1><p>Traces are generated during test execution.</p></body></html>" > public/traces/index.html
