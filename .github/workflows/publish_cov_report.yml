@@ -48,6 +48,17 @@ jobs:
     - name: Generate coverage report
       run: reportgenerator "-reports:UPTSiteTests/TestResults/*/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:HTML
       
+    - name: List generated files (debug)
+      run: |
+        echo "=== Coverage Report Files ==="
+        ls -la coverage-report/ || echo "No coverage-report directory"
+        echo "=== Video Files ==="
+        ls -la UPTSiteTests/bin/Debug/net8.0/videos/ || echo "No videos directory"
+        echo "=== Trace Files ==="
+        ls -la UPTSiteTests/bin/Debug/net8.0/playwright-traces/ || echo "No traces directory"
+        echo "=== Test Results ==="
+        find UPTSiteTests/TestResults -type f -name "*.xml" || echo "No XML files"
+      
     - name: Create artifacts directory
       run: |
         mkdir -p public
@@ -56,18 +67,33 @@ jobs:
         mkdir -p public/traces
         
     - name: Copy coverage report
-      run: cp -r coverage-report/* public/coverage/
+      run: |
+        if [ -d "coverage-report" ] && [ "$(ls -A coverage-report)" ]; then
+          cp -r coverage-report/* public/coverage/
+          echo "✅ Coverage report copied"
+        else
+          echo "⚠️ No coverage report found"
+          echo "<html><body><h1>No coverage report available</h1></body></html>" > public/coverage/index.html
+        fi
       
     - name: Copy videos
       run: |
-        if [ -d "UPTSiteTests/bin/Debug/net8.0/videos" ]; then
-          cp -r UPTSiteTests/bin/Debug/net8.0/videos/* public/videos/ || true
+        if [ -d "UPTSiteTests/bin/Debug/net8.0/videos" ] && [ "$(ls -A UPTSiteTests/bin/Debug/net8.0/videos 2>/dev/null)" ]; then
+          cp -r UPTSiteTests/bin/Debug/net8.0/videos/* public/videos/
+          echo "✅ Videos copied: $(ls UPTSiteTests/bin/Debug/net8.0/videos | wc -l) files"
+        else
+          echo "⚠️ No videos found"
+          echo "<html><body><h1>No videos available</h1><p>Videos are generated during test execution.</p></body></html>" > public/videos/index.html
         fi
         
     - name: Copy traces
       run: |
-        if [ -d "UPTSiteTests/bin/Debug/net8.0/playwright-traces" ]; then
-          cp -r UPTSiteTests/bin/Debug/net8.0/playwright-traces/* public/traces/ || true
+        if [ -d "UPTSiteTests/bin/Debug/net8.0/playwright-traces" ] && [ "$(ls -A UPTSiteTests/bin/Debug/net8.0/playwright-traces 2>/dev/null)" ]; then
+          cp -r UPTSiteTests/bin/Debug/net8.0/playwright-traces/* public/traces/
+          echo "✅ Traces copied: $(ls UPTSiteTests/bin/Debug/net8.0/playwright-traces | wc -l) files"
+        else
+          echo "⚠️ No traces found"
+          echo "<html><body><h1>No traces available</h1><p>Traces are generated during test execution.</p></body></html>" > public/traces/index.html
         fi
         
     - name: Create index.html
