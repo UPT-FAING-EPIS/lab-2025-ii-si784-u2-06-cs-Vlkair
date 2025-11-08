@@ -240,24 +240,6 @@ jobs:
           echo "<html><body><h1>No traces available</h1><p>Traces are generated during test execution.</p></body></html>" > public/traces/index.html
         fi
         
-    - name: Verify public directory structure
-      run: |
-        echo "📁 Estructura del directorio public:"
-        echo "=================================="
-        tree public -L 2 || find public -type f | head -30
-        echo ""
-        echo "📊 Coverage index.html exists:"
-        ls -lh public/coverage/index.html || echo "❌ NOT FOUND"
-        echo ""
-        echo "🎬 Videos index.html exists:"
-        ls -lh public/videos/index.html || echo "❌ NOT FOUND"
-        echo ""
-        echo "🔍 Traces index.html exists:"
-        ls -lh public/traces/index.html || echo "❌ NOT FOUND"
-        echo ""
-        echo "🏠 Main index.html exists:"
-        ls -lh public/index.html || echo "❌ NOT FOUND"
-        
     - name: Create index.html
       run: |
         cat > public/index.html << 'EOF'
@@ -388,6 +370,24 @@ jobs:
         </body>
         </html>
         EOF
+        
+    - name: Verify public directory structure
+      run: |
+        echo "📁 Estructura del directorio public:"
+        echo "=================================="
+        tree public -L 2 || find public -type f | head -30
+        echo ""
+        echo "📊 Coverage index.html exists:"
+        ls -lh public/coverage/index.html || echo "❌ NOT FOUND"
+        echo ""
+        echo "🎬 Videos index.html exists:"
+        ls -lh public/videos/index.html || echo "❌ NOT FOUND"
+        echo ""
+        echo "🔍 Traces index.html exists:"
+        ls -lh public/traces/index.html || echo "❌ NOT FOUND"
+        echo ""
+        echo "🏠 Main index.html exists:"
+        ls -lh public/index.html || echo "❌ NOT FOUND"
         
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
