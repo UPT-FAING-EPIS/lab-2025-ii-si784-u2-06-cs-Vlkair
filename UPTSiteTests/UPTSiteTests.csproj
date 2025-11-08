@@ -21,4 +21,12 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
+  <!-- Auto-install Playwright browsers after build -->
+  <Target Name="InstallPlaywright" AfterTargets="Build">
+    <Exec Command="pwsh $(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/playwright.ps1 install --with-deps" 
+          IgnoreExitCode="false" 
+          ContinueOnError="false"
+          Condition="Exists('$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/playwright.ps1')" />
+  </Target>
+
 </Project>
