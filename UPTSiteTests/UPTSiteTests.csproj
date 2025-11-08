@@ -5,8 +5,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
     <IsTestProject>true</IsTestProject>
+    
+    <!-- NuGet Package Information -->
+    <PackageId>UPTSiteTests</PackageId>
+    <Version>2021058694.1.0</Version>
+    <Authors>Victor Cruz</Authors>
+    <Company>Universidad Privada de Tacna</Company>
+    <Product>UPT Site Automated Tests</Product>
+    <Description>Automated tests for UPT website using Playwright and MSTest. Includes coverage reports, video recordings, and traces.</Description>
+    <PackageTags>playwright;testing;automation;upt;mstest</PackageTags>
+    <RepositoryUrl>https://github.com/UPT-FAING-EPIS/lab-2025-ii-si784-u2-06-cs-Vlkair</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/UPT-FAING-EPIS/lab-2025-ii-si784-u2-06-cs-Vlkair</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

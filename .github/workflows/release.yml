@@ -1,0 +1,93 @@
+name: Release NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 2021058694.1.0)'
+        required: true
+        default: '2021058694.1.0'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Get version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Update package version
+      run: |
+        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.VERSION }}<\/Version>/" UPTSiteTests/UPTSiteTests.csproj
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Pack NuGet
+      run: dotnet pack UPTSiteTests/UPTSiteTests.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.version.outputs.VERSION }}
+      
+    - name: Publish to GitHub Packages
+      run: |
+        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+        dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "github" --skip-duplicate
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        name: Release v${{ steps.version.outputs.VERSION }}
+        body: |
+          ## 📦 NuGet Package Release
+          
+          ### Información del Release
+          - **Versión**: ${{ steps.version.outputs.VERSION }}
+          - **Matrícula**: 2021058694
+          - **Fecha**: ${{ github.event.head_commit.timestamp }}
+          
+          ### Contenido
+          - ✅ Paquete NuGet publicado en GitHub Packages
+          - ✅ 5 Tests automatizados con Playwright
+          - ✅ Reportes de cobertura de código
+          - ✅ Videos y traces de pruebas
+          
+          ### Instalación
+          ```bash
+          dotnet add package UPTSiteTests --version ${{ steps.version.outputs.VERSION }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          ```
+          
+          ### Tests Incluidos
+          1. `HasTitle` - Validación de título de página
+          2. `GetSchoolDirectorName` - Verificación de director de escuela
+          3. `SearchStudentInDirectoryPage` - Búsqueda de estudiante
+          4. `VerifyHomePageHasContent` - Validación de contenido
+          5. `VerifyNavigationMenuIsVisible` - Verificación de menú
+        files: |
+          ./nupkg/*.nupkg
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
