@@ -1,0 +1,220 @@
+name: Publish Coverage Report
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Run Tests and Generate Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+      
+    - name: Install Playwright browsers
+      run: pwsh UPTSiteTests/bin/Debug/net8.0/playwright.ps1 install --with-deps
+      
+    - name: Run tests with coverage
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      
+    - name: Generate coverage report
+      run: reportgenerator "-reports:UPTSiteTests/TestResults/*/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:HTML
+      
+    - name: Create artifacts directory
+      run: |
+        mkdir -p public
+        mkdir -p public/coverage
+        mkdir -p public/videos
+        mkdir -p public/traces
+        
+    - name: Copy coverage report
+      run: cp -r coverage-report/* public/coverage/
+      
+    - name: Copy videos
+      run: |
+        if [ -d "UPTSiteTests/bin/Debug/net8.0/videos" ]; then
+          cp -r UPTSiteTests/bin/Debug/net8.0/videos/* public/videos/ || true
+        fi
+        
+    - name: Copy traces
+      run: |
+        if [ -d "UPTSiteTests/bin/Debug/net8.0/playwright-traces" ]; then
+          cp -r UPTSiteTests/bin/Debug/net8.0/playwright-traces/* public/traces/ || true
+        fi
+        
+    - name: Create index.html
+      run: |
+        cat > public/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>UPT Site Tests - Reportes</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                header {
+                    text-align: center;
+                    color: white;
+                    padding: 40px 0;
+                }
+                h1 {
+                    font-size: 2.5em;
+                    margin-bottom: 10px;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                }
+                .subtitle {
+                    font-size: 1.2em;
+                    opacity: 0.9;
+                }
+                .cards {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 30px;
+                    margin-top: 40px;
+                }
+                .card {
+                    background: white;
+                    border-radius: 15px;
+                    padding: 30px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+                .card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+                }
+                .card-icon {
+                    font-size: 3em;
+                    margin-bottom: 20px;
+                }
+                .card h2 {
+                    color: #333;
+                    margin-bottom: 15px;
+                    font-size: 1.5em;
+                }
+                .card p {
+                    color: #666;
+                    margin-bottom: 20px;
+                    line-height: 1.6;
+                }
+                .card a {
+                    display: inline-block;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    padding: 12px 30px;
+                    border-radius: 25px;
+                    font-weight: bold;
+                    transition: opacity 0.3s ease;
+                }
+                .card a:hover {
+                    opacity: 0.9;
+                }
+                footer {
+                    text-align: center;
+                    color: white;
+                    margin-top: 60px;
+                    padding: 20px;
+                    opacity: 0.8;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <header>
+                    <h1>🎯 UPT Site Tests</h1>
+                    <p class="subtitle">Reportes de Pruebas Automatizadas</p>
+                </header>
+                
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-icon">📊</div>
+                        <h2>Reporte de Cobertura</h2>
+                        <p>Visualiza el reporte detallado de cobertura de código generado por las pruebas automatizadas.</p>
+                        <a href="coverage/index.html">Ver Reporte</a>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🎬</div>
+                        <h2>Videos de Pruebas</h2>
+                        <p>Grabaciones de video de la ejecución de cada escenario de prueba automatizada.</p>
+                        <a href="videos/">Ver Videos</a>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-icon">🔍</div>
+                        <h2>Traces de Playwright</h2>
+                        <p>Archivos de traza detallados para debugging y análisis de las pruebas.</p>
+                        <a href="traces/">Ver Traces</a>
+                    </div>
+                </div>
+                
+                <footer>
+                    <p>Universidad Privada de Tacna - Escuela Profesional de Ingeniería de Sistemas</p>
+                    <p>Generado automáticamente con GitHub Actions</p>
+                </footer>
+            </div>
+        </body>
+        </html>
+        EOF
+        
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'public'
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
