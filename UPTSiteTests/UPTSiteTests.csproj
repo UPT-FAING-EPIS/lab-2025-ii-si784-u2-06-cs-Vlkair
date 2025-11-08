@@ -9,13 +9,16 @@
     <IsTestProject>true</IsTestProject>
     
     <!-- NuGet Package Information -->
-    <PackageId>UPTSiteTests</PackageId>
-    <Version>2021058694.1.0</Version>
-    <Authors>Victor Cruz</Authors>
+    <PackageId>UPTSiteTests.2021058694</PackageId>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0+matricula.2021058694</InformationalVersion>
+    <Authors>Victor Cruz (2021058694)</Authors>
     <Company>Universidad Privada de Tacna</Company>
     <Product>UPT Site Automated Tests</Product>
-    <Description>Automated tests for UPT website using Playwright and MSTest. Includes coverage reports, video recordings, and traces.</Description>
-    <PackageTags>playwright;testing;automation;upt;mstest</PackageTags>
+    <Description>Automated tests for UPT website using Playwright and MSTest. Matrícula: 2021058694. Includes coverage reports, video recordings, and traces.</Description>
+    <PackageTags>playwright;testing;automation;upt;mstest;2021058694</PackageTags>
     <RepositoryUrl>https://github.com/UPT-FAING-EPIS/lab-2025-ii-si784-u2-06-cs-Vlkair</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
