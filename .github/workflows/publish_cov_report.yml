@@ -46,7 +46,14 @@ jobs:
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
       
     - name: Generate coverage report
-      run: reportgenerator "-reports:UPTSiteTests/TestResults/*/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:HTML
+      run: |
+        echo "🔍 Searching for coverage files..."
+        find UPTSiteTests/TestResults -name "*.xml" -type f
+        echo "📊 Generating coverage report..."
+        reportgenerator "-reports:UPTSiteTests/TestResults/*/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:HTML
+        echo "✅ Coverage report generated"
+        echo "📁 Coverage report contents:"
+        ls -la coverage-report/ | head -20
       
     - name: List generated files (debug)
       run: |
@@ -71,9 +78,29 @@ jobs:
         if [ -d "coverage-report" ] && [ "$(ls -A coverage-report)" ]; then
           cp -r coverage-report/* public/coverage/
           echo "✅ Coverage report copied"
+          ls -la public/coverage/
         else
           echo "⚠️ No coverage report found"
-          echo "<html><body><h1>No coverage report available</h1></body></html>" > public/coverage/index.html
+          echo "Creating placeholder..."
+          cat > public/coverage/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Reporte de Cobertura No Disponible</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+                .error { background: #ffebee; border-left: 4px solid #f44336; padding: 20px; border-radius: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class="error">
+                <h1>❌ Reporte de Cobertura No Disponible</h1>
+                <p>El reporte de cobertura no se generó correctamente. Verifica los logs del workflow.</p>
+            </div>
+        </body>
+        </html>
+        EOF
         fi
       
     - name: Copy videos
