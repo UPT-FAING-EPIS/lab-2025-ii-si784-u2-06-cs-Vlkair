@@ -49,8 +49,19 @@ jobs:
       run: |
         echo "🔍 Searching for coverage files..."
         find UPTSiteTests/TestResults -name "*.xml" -type f
+        echo ""
+        echo "� Content of coverage files:"
+        find UPTSiteTests/TestResults -name "coverage.cobertura.xml" -exec echo "=== {} ===" \; -exec head -20 {} \;
+        echo ""
         echo "📊 Generating coverage report..."
-        reportgenerator "-reports:UPTSiteTests/TestResults/*/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:HTML
+        COVERAGE_FILE=$(find UPTSiteTests/TestResults -name "coverage.cobertura.xml" | head -1)
+        if [ -n "$COVERAGE_FILE" ]; then
+          echo "Using coverage file: $COVERAGE_FILE"
+          reportgenerator "-reports:$COVERAGE_FILE" "-targetdir:coverage-report" "-reporttypes:Html" "-verbosity:Info"
+        else
+          echo "❌ No coverage file found!"
+          exit 1
+        fi
         echo "✅ Coverage report generated"
         echo "📁 Coverage report contents:"
         ls -la coverage-report/ | head -20
