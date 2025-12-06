@@ -10,7 +10,7 @@
 **Curso:** SI784 - Calidad y Pruebas de Software  
 
 **Estudiante:** Victor Williams Cruz Mamani  
-**Matrícula:** 2021058694  
+**Matrícula:** 2022073903  
 **Fecha de Realización:** Diciembre 2025  
 **Semestre Académico:** 2025-II
 
